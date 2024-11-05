@@ -1,0 +1,25 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: smpp-load-test
+spec:
+  concurrencyPolicy: Forbid
+  schedule: "* * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: k6-smpp-test
+            image: k6-smpp-test
+            imagePullPolicy: IfNotPresent
+            env:
+              - name: SMPP_SERVER
+                value: smpp-service.default.svc:7777
+              - name: HOST_IP
+                valueFrom:
+                  fieldRef:
+                    fieldPath: status.hostIP
+              - name: K6_OTEL_GRPC_EXPORTER_ENDPOINT
+                value: $(HOST_IP):4317
+          restartPolicy: OnFailure

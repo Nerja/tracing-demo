@@ -1,0 +1,49 @@
+spring:
+  main:
+    banner-mode: "off"
+  application:
+    name: channel-adapter
+  threads:
+    virtual:
+      enabled: true
+  kafka:
+    producer:
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      acks: all
+    template:
+      observation-enabled: true
+    listener:
+      observation-enabled: true
+    consumer:
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring:
+          json:
+            trusted:
+              packages: '*'
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    password: guest
+    port: 5672
+    username: guest
+    exchange: user.exchange
+    queue: user.queue
+    routingkey: user.routingkey
+    listener:
+      simple:
+        observation-enabled: true
+server:
+  port:
+    7780
+management:
+  tracing:
+    enabled: true
+    sampling:
+      probability: 1
+  otlp:
+    tracing:
+      endpoint: http://${OTLP_HTTP_HOST:127.0.0.1}:4318/v1/traces
+logging:
+  structured:
+    format:
+      console: ecs

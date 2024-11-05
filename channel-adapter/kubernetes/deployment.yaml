@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: channel-adapter
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: channel-adapter
+  template:
+    metadata:
+      labels:
+        app: channel-adapter
+    spec:
+      containers:
+      - name: channel-adapter
+        image: channel-adapter
+        ports:
+        - containerPort: 80
+        env:
+          - name: RABBITMQ_HOST
+            value: rabbitmq.rabbitmq.svc
+          - name: OTLP_HTTP_HOST
+            valueFrom:
+              fieldRef:
+                fieldPath: status.hostIP

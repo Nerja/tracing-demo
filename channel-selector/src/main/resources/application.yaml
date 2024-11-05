@@ -1,0 +1,55 @@
+spring:
+  main:
+    banner-mode: "off"
+  application:
+    name: channel-selector
+  threads:
+    virtual:
+      enabled: true
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    password: guest
+    port: 5672
+    username: guest
+    exchange: user.exchange
+    queue: user.queue
+    routingkey: user.routingkey
+    template:
+      observation-enabled: true
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    producer:
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      acks: all
+    template:
+      observation-enabled: true
+    listener:
+      observation-enabled: true
+    consumer:
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring:
+          json:
+            trusted:
+              packages: '*'
+  data:
+    redis:
+      password: redis
+      host: ${REDIS_HOST:localhost}
+  r2dbc:
+    url: r2dbc:pool:mysql://root:oredev@${DATABASE_HOST:localhost}:3306/
+server:
+  port:
+    7779
+management:
+  tracing:
+    enabled: true
+    sampling:
+      probability: 1
+  otlp:
+    tracing:
+      endpoint: http://${OTLP_HTTP_HOST:127.0.0.1}:4318/v1/traces
+logging:
+  structured:
+    format:
+      console: ecs

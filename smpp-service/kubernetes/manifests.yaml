@@ -1,0 +1,39 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: smpp-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: smpp-service
+  template:
+    metadata:
+      labels:
+        app: smpp-service
+    spec:
+      containers:
+      - name: smpp-service
+        image: smpp-service
+        ports:
+        - containerPort: 7777
+        env:
+          - name: KAFKA_BOOTSTRAP_SERVERS
+            value: my-cluster-kafka-bootstrap.kafka.svc:9092
+          - name: OTLP_HTTP_HOST
+            valueFrom:
+              fieldRef:
+                fieldPath: status.hostIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: smpp-service
+spec:
+  selector:
+    app: smpp-service
+  ports:
+    - protocol: TCP
+      port: 7777
+      targetPort: 7777

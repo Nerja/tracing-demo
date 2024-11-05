@@ -1,0 +1,45 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql
+  namespace: mysql
+spec:
+  selector:
+    matchLabels:
+      app: mysql
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      containers:
+      - image: bitnami/mysql:8.0.39
+        name: mysql
+        ports:
+        - containerPort: 3306
+          name: mysql
+        env:
+          - name: MYSQL_ROOT_PASSWORD
+            value: "oredev"
+          - name: "MYSQL_AUTHENTICATION_PLUGIN"
+            value: "mysql_native_password"
+          - name: "MYSQL_DATABASE"
+            value: "oredev"
+          - name: "MYSQL_USER"
+            value: "oredev"
+          - name: "MYSQL_PASSWORD"
+            value: "oredev"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql
+  namespace: mysql
+spec:
+  ports:
+  - port: 3306
+  selector:
+    app: mysql

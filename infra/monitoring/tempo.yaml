@@ -1,0 +1,38 @@
+metricsGenerator:
+  enabled: true
+  config:
+    storage:
+      remote_write:
+      - url: http://st-kube-prometheus-stack-prometheus.monitoring:9090/api/v1/write
+        send_exemplars: true
+    processor:
+      service_graphs:
+        wait: 60s
+global_overrides:
+  defaults:
+    metrics_generator:
+      processors:
+        - span-metrics
+        - service-graphs
+traces:
+  otlp:
+    grpc:
+      enabled: true
+storage:
+  trace:
+    backend: s3
+    s3:
+      access_key: 'grafana-tempo'
+      secret_key: 'supersecret'
+      bucket: 'tempo-traces'
+      endpoint: 'tmp-minio.monitoring:9000'
+      insecure: true
+minio:
+  enabled: true
+  mode: standalone
+  rootUser: grafana-tempo
+  rootPassword: supersecret
+  buckets:
+    - name: tempo-traces
+      policy: none
+      purge: false

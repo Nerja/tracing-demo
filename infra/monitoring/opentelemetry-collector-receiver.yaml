@@ -1,0 +1,55 @@
+mode: daemonset
+config:
+  extensions:
+    file_storage/otc:
+      directory: /var/lib/storage/otc
+      timeout: 10s
+  receivers:
+    otlp:
+      protocols:
+        grpc:
+          endpoint: 0.0.0.0:4317
+  processors:
+    memory_limiter:
+      check_interval: 1s
+      limit_mib: 2000
+    batch:
+      send_batch_size: 100
+      send_batch_max_size: 100
+  exporters:
+    kafka:
+      brokers:
+        - my-cluster-kafka-bootstrap.kafka.svc:9092
+      protocol_version: 2.0.0
+      topic: opentelemetry-spans
+      retry_on_failure:
+        max_interval: 30s
+        max_elapsed_time: 3600s
+      sending_queue:
+        queue_size: 10000
+        storage: file_storage/otc
+  service:
+    extensions: [file_storage/otc, health_check]
+    pipelines:
+      traces:
+        receivers: [otlp]
+        processors: [memory_limiter, batch]
+        exporters: [kafka]
+extraVolumes:
+  - name: otel-storage
+    hostPath:
+      path: /var/lib/storage/otc
+extraVolumeMounts:
+  - name: otel-storage
+    mountPath: /var/lib/storage/otc
+    readOnly: false
+initContainers:
+  - name: init-fs
+    image: busybox:latest
+    command:
+      - sh
+      - '-c'
+      - 'chown -R 10001: /var/lib/storage/otc'
+    volumeMounts:
+      - name: otel-storage
+        mountPath: /var/lib/storage/otc

@@ -1,0 +1,28 @@
+---
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  name: opentelemetry-spans
+  labels:
+    strimzi.io/cluster: my-cluster
+  namespace: kafka
+spec:
+  partitions: 6
+  replicas: 1
+  config:
+    retention.ms: 3600000
+    segment.ms: 36000
+---
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  name: message-inbound
+  labels:
+    strimzi.io/cluster: my-cluster
+  namespace: kafka
+spec:
+  partitions: 6
+  replicas: 1
+  config:
+    retention.ms: 3600000
+    segment.ms: 36000

@@ -1,0 +1,36 @@
+spring:
+    main:
+      banner-mode: "off"
+    application:
+      name: smpp-service
+    threads:
+      virtual:
+        enabled: true
+    kafka:
+      bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+      template:
+        observation-enabled: true
+      producer:
+        value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+        acks: all
+server:
+  port:
+    7778
+logging:
+    level:
+      com.cloudhopper: WARN
+    structured:
+      format:
+        console: ecs
+management:
+  tracing:
+    enabled: true
+    sampling:
+      probability: 1
+  otlp:
+    tracing:
+      endpoint: http://${OTLP_HTTP_HOST:127.0.0.1}:4318/v1/traces
+  endpoints:
+    web:
+      exposure:
+        include: '*'

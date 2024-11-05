@@ -1,0 +1,37 @@
+apiVersion: skaffold/v4beta11
+kind: Config
+metadata:
+  name: tracing-demo
+build:
+  tagPolicy:
+    inputDigest: {}
+  artifacts:
+    - context: smpp-service
+      image: smpp-service
+      jib:
+        args: [--no-daemon]
+        type: gradle
+    - context: channel-selector
+      image: channel-selector
+      jib:
+        args: [--no-daemon]
+        type: gradle
+    - context: channel-adapter
+      image: channel-adapter
+      jib:
+        args: [--no-daemon]
+        type: gradle
+    - context: smpp-load-test
+      image: k6-smpp-test
+manifests:
+  rawYaml:
+    - smpp-service/kubernetes/manifests.yaml
+    - channel-selector/kubernetes/deployment.yaml
+    - channel-adapter/kubernetes/deployment.yaml
+    - smpp-load-test/cronjob.yaml
+deploy:
+  kubeContext: kind-tracing-demo
+  kubectl:
+    flags:
+      apply:
+        - --context=kind-tracing-demo

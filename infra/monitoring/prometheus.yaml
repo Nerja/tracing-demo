@@ -1,0 +1,37 @@
+prometheus:
+  prometheusSpec:
+    enableFeatures:
+      - exemplar-storage
+      - remote-write-receiver
+grafana:
+  additionalDataSources:
+    - name: tempo
+      type: tempo
+      url: http://tmp-tempo-query-frontend.monitoring:3100
+      jsonData:
+        tracesToLogs:
+          datasourceUid: loki
+          filterByTraceID: true
+          filterBySpanID: true
+        serviceMap:
+          datasourceUid: prometheus
+    - name: loki
+      type: loki
+      url: http://loki.monitoring:3100
+      jsonData:
+        derivedFields:
+          - datasourceUid: tempo
+            matcherRegex: traceId
+            matcherType: label
+            name: TraceID
+            url: '$${__value.raw}'
+    - name: prometheus
+      url: http://st-kube-prometheus-stack-prometheus.monitoring:9090
+      type: prometheus
+      jsonData:
+        exemplarTraceIdDestinations:
+          - datasourceUid: tempo
+            name: traceID
+  sidecar:
+    datasources:
+      defaultDatasourceEnabled: false

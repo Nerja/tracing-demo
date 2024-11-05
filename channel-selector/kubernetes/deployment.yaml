@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: channel-selector
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: channel-selector
+  template:
+    metadata:
+      labels:
+        app: channel-selector
+    spec:
+      containers:
+      - name: channel-selector
+        image: channel-selector
+        ports:
+        - containerPort: 80
+        env:
+          - name: KAFKA_BOOTSTRAP_SERVERS
+            value: my-cluster-kafka-bootstrap.kafka.svc:9092
+          - name: REDIS_CLUSTER_NODES
+            value: cluster-redis-cluster-headless.redis:6379
+          - name: REDIS_HOST
+            value: my-release-redis-master.redis.svc
+          - name: DATABASE_HOST
+            value: mysql.mysql.svc
+          - name: RABBITMQ_HOST
+            value: rabbitmq.rabbitmq.svc
+          - name: OTLP_HTTP_HOST
+            valueFrom:
+              fieldRef:
+                fieldPath: status.hostIP

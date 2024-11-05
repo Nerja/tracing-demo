@@ -1,0 +1,36 @@
+mode: deployment
+config:
+  receivers:
+    kafka:
+      brokers:
+        - my-cluster-kafka-bootstrap.kafka.svc:9092
+      protocol_version: 2.1.0
+      topic: opentelemetry-spans
+      message_marking:
+        after: true
+      autocommit:
+        enable: false
+  processors:
+    memory_limiter:
+      check_interval: 1s
+      limit_mib: 2000
+    batch/traces:
+      send_batch_size: 100
+      send_batch_max_size: 100
+  exporters:
+    otlp:
+      endpoint: tmp-tempo-distributor.monitoring:4317
+      tls:
+        insecure: true
+      retry_on_failure:
+        max_interval: 30s
+        max_elapsed_time: 3600s
+      sending_queue:
+        enabled: false
+  service:
+    extensions: [health_check]
+    pipelines:
+      traces:
+        receivers: [kafka]
+        processors: [memory_limiter, batch/traces]
+        exporters: [otlp]
